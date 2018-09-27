@@ -1,0 +1,12 @@
+---
+title: "Visualization Part 1"
+author: "Devon Morgan"
+date: "9/27/2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+library(tidyverse)
+```
+
+## R Markdown
