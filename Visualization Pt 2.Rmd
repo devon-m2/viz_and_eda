@@ -1,0 +1,149 @@
+---
+title: "Visualization Part 1"
+author: "Devon Morgan"
+date: "9/27/2018"
+output: html_document
+---
+
+Code set up: 
+
+```{r setup, include=FALSE}
+library(tidyverse)
+library(ggridges)
+library(patchwork)
+
+# Set global parameters for figures produced today. 
+
+knitr::opts_chunk$set(
+  fig.width = 6,
+  fig.asp = 0.6,
+  out.width = "90%"
+)
+```
+
+## R Markdown
+
+
+```{r data_import, cache = TRUE}
+library(rnoaa)
+
+weather_df = rnoaa::meteo_pull_monitors(c("USW00094728", "USC00519397", "USS0023B17S"),
+                      var = c("PRCP", "TMIN", "TMAX"), 
+                      date_min = "2017-01-01",
+                      date_max = "2017-12-31") %>%
+  mutate(
+    name = recode(id, USW00094728 = "CentralPark_NY", 
+                      USC00519397 = "Waikiki_HA",
+                      USS0023B17S = "Waterhole_WA"),
+    tmin = tmin / 10,
+    tmax = tmax / 10) %>%
+  select(name, id, everything())
+weather_df
+```
+
+## Revisit plot
+
+Always helpful to include labels in plots. This is helpful for x and y axes and overall. 
+
+```{r}
+ggplot(weather_df, aes(x = tmin, y = tmax)) + 
+  geom_point(aes(color = name), alpha = .5) +
+  labs(
+      title = "Temperature plot",
+      x = "Minimum daily temperature (C)",
+      y = "Maxiumum daily temperature (C)",
+      caption = "Data from the rnoaa package"
+    )
+```
+
+Next, manipulate scale using `scale` functions. The `scale_x_*` where the value for * depends on the type of variable of interest. Use Option + 0 to make a degree symbol. 
+
+```{r}
+ggplot(weather_df, aes(x = tmin, y = tmax)) + 
+  geom_point(aes(color = name), alpha = .5) +
+  labs(
+      title = "Temperature plot",
+      x = "Minimum daily temperature (C)",
+      y = "Maxiumum daily temperature (C)",
+      caption = "Data from the rnoaa package"
+    ) + 
+  scale_x_continuous(
+      breaks = c(-15, 0, 15), 
+      labels = c("-15º C", "0", "15"))
+```
+
+
+
+
+
+
+
+
+
+
+```{r}
+ggplot(weather_df, aes(x = date, y = tmax, color = name)) + 
+  geom_smooth(se = FALSE) 
+
+
+```
+
+## Univariate Plots
+
+
+```{r}
+ggplot(weather_df, aes(x = tmax)) + 
+  geom_histogram()
+
+
+ggplot(weather_df, aes(x = tmax, fill = name)) + 
+  geom_histogram(position = "dodge", binwidth = 2)
+
+ggplot(weather_df, aes(x = tmax, fill = name)) + 
+  geom_density(alpha = .4, adjust = .5, color = "blue")
+```
+
+Boxplots: 
+
+```{r}
+ggplot(weather_df, aes(x = name, y = tmax)) + geom_boxplot()
+
+ggplot(weather_df, aes(x = tmax, y = name)) + 
+  geom_density_ridges(scale = .85)
+```
+
+## Last example: 
+
+Make a bunch of plots: 
+
+Boxplot does the best job of describing the distribution because can see more details about the data. 
+
+```{r}
+ggplot(weather_df, aes(y = prcp, x = name)) +
+    geom_boxplot()
+```
+
+Violin plot is not as good because cannot see as much regarding the underlying data points. 
+
+```{r}
+ggplot(weather_df, aes(y = prcp, x = name)) +
+    geom_violin()
+```
+
+```{r}
+weather_df %>% 
+    filter(prcp < 100) %>% 
+ggplot(aes(x = prcp, fill = name)) + 
+    geom_density(alpha = 0.5)
+```
+
+This version shows more of the data. 
+```{r}
+weather_df %>% 
+    filter(prcp > 0) %>% 
+ggplot(aes(x = prcp, fill = name)) + 
+    geom_density(alpha = 0.5)
+```
+
+
+
