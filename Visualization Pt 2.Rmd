@@ -69,81 +69,121 @@ ggplot(weather_df, aes(x = tmin, y = tmax)) +
     ) + 
   scale_x_continuous(
       breaks = c(-15, 0, 15), 
-      labels = c("-15º C", "0", "15"))
+      labels = c("-15º C", "0", "15"),
+      limits = c(-20, 30)) +
+  # switches the y axis to the other side 
+  scale_y_continuous(trans = "sqrt", 
+                     position = "right")
+
+```
+
+## Colors and themes
+
+Adjust color. Can rename the name that appears in the legend using `name` function in `scale_color_hue`. 
+
+```{r}
+ggplot(weather_df, aes(x = tmin, y = tmax)) + 
+  geom_point(aes(color = name), alpha = .5) +
+  labs(
+      title = "Temperature plot",
+      x = "Minimum daily temperature (C)",
+      y = "Maxiumum daily temperature (C)",
+      caption = "Data from the rnoaa package"
+    ) + 
+  scale_color_hue(name = "Location",
+                    h = c(100, 200),
+                    l = 50)
+```
+
+Use pre-described color pallettes, namely `viridis` package. 
+
+```{r}
+ggplot(weather_df, aes(x = tmin, y = tmax)) + 
+  geom_point(aes(color = name), alpha = .5) +
+  labs(
+      title = "Temperature plot",
+      x = "Minimum daily temperature (C)",
+      y = "Maxiumum daily temperature (C)",
+      caption = "Data from the rnoaa package"
+    ) + 
+  viridis::scale_color_viridis(
+    name = "Location", 
+    discrete = TRUE
+  )
+```
+
+Can also change the position of the plot legend: 
+
+```{r}
+ggplot(weather_df, aes(x = tmin, y = tmax)) + 
+  geom_point(aes(color = name), alpha = .5) + 
+  labs(
+    title = "Temperature plot",
+    x = "Minimum daily temperature (C)",
+    y = "Maxiumum daily temperature (C)",
+    caption = "Data from the rnoaa package"
+  ) + 
+  viridis::scale_color_viridis(
+    name = "Location", 
+    discrete = TRUE
+  ) + 
+  theme(legend.position = "bottom")
 ```
 
 
+## Themes
 
+`theme_bw` changes background to white instead of gray. 
 
+```{r}
+ggplot(weather_df, aes(x = tmin, y = tmax)) + 
+  geom_point(aes(color = name), alpha = .5) + 
+  labs(
+    title = "Temperature plot",
+    x = "Minimum daily temperature (C)",
+    y = "Maxiumum daily temperature (C)",
+    caption = "Data from the rnoaa package"
+  ) + 
+  viridis::scale_color_viridis(
+    name = "Location", 
+    discrete = TRUE
+  ) + 
+  theme_bw() +
+  theme(legend.position = "bottom")
+```
 
-
-
-
-
+## Learning Assessment
 
 ```{r}
 ggplot(weather_df, aes(x = date, y = tmax, color = name)) + 
-  geom_smooth(se = FALSE) 
-
-
+  geom_smooth(se = FALSE) + 
+  geom_point(aes(size = prcp), alpha = .75) + 
+  labs(
+    title = "Temperature plot",
+    x = "Date",
+    y = "Maxiumum daily temperature (C)",
+    caption = "Data from the rnoaa package"
+  ) + 
+  viridis::scale_color_viridis(discrete = TRUE) + 
+  theme_minimal() +
+  theme(legend.position = "bottom")
 ```
 
-## Univariate Plots
+## Arguments to `geom_*`:
 
+Add in different dataset to the plot - stacking a new layer of new data: 
 
 ```{r}
-ggplot(weather_df, aes(x = tmax)) + 
-  geom_histogram()
+central_park = 
+  weather_df %>% 
+  filter(name == "CentralPark_NY")
 
+waikiki = 
+  weather_df %>% 
+  filter(name == "Waikiki_HA")
 
-ggplot(weather_df, aes(x = tmax, fill = name)) + 
-  geom_histogram(position = "dodge", binwidth = 2)
-
-ggplot(weather_df, aes(x = tmax, fill = name)) + 
-  geom_density(alpha = .4, adjust = .5, color = "blue")
+ggplot(waikiki, aes(x = date, y = tmax, color = name)) + 
+  geom_point() + 
+  geom_line(data = central_park)
 ```
-
-Boxplots: 
-
-```{r}
-ggplot(weather_df, aes(x = name, y = tmax)) + geom_boxplot()
-
-ggplot(weather_df, aes(x = tmax, y = name)) + 
-  geom_density_ridges(scale = .85)
-```
-
-## Last example: 
-
-Make a bunch of plots: 
-
-Boxplot does the best job of describing the distribution because can see more details about the data. 
-
-```{r}
-ggplot(weather_df, aes(y = prcp, x = name)) +
-    geom_boxplot()
-```
-
-Violin plot is not as good because cannot see as much regarding the underlying data points. 
-
-```{r}
-ggplot(weather_df, aes(y = prcp, x = name)) +
-    geom_violin()
-```
-
-```{r}
-weather_df %>% 
-    filter(prcp < 100) %>% 
-ggplot(aes(x = prcp, fill = name)) + 
-    geom_density(alpha = 0.5)
-```
-
-This version shows more of the data. 
-```{r}
-weather_df %>% 
-    filter(prcp > 0) %>% 
-ggplot(aes(x = prcp, fill = name)) + 
-    geom_density(alpha = 0.5)
-```
-
-
 
